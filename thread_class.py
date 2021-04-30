@@ -5,8 +5,11 @@ from bs4 import BeautifulSoup
 
 
 class ScrapCategory(Thread):
+    """Thread used to get all books data in one category and create the correspondent csv file"""
 
     def __init__(self, url_list, category_name, regex_encode_issue, target_url, extract_number_expression):
+        """Thread initialization"""
+
         Thread.__init__(self)
         ScrapCategory.columns_headers = "product_page_url; universal_ product_code (upc);" \
                                         " title; price_including_tax; " \
@@ -23,6 +26,7 @@ class ScrapCategory(Thread):
         self.target_url = target_url
 
     def run(self):
+        """Code to execute during thread execution"""
 
         with open("results/{}.csv".format(self.category_name), "w") as file:
             file.write(ScrapCategory.columns_headers)
@@ -51,11 +55,11 @@ class ScrapCategory(Thread):
                     information_table = book_soup.findAll("td")
 
                     info_list = [book_page_url] \
-                        # list who contains all data about the book (sorted in order)
+                        # list which contains all data about the book (sorted in order)
 
                     for information_line in information_table: \
-                            # loop who gets data from the information tab and add them in the info_list
-                        information_line = str(information_line.get_text())
+                            # loop which gets data from the information tab and adds them in the info_list
+                        information_line = information_line.get_text()
                         info_list.append(information_line)
                     del info_list[2]  # remove the field "Books"
                     del info_list[4]  # remove the field "tax"
