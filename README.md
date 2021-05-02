@@ -40,7 +40,7 @@ Finally, the script generates a csv file containing the information retrieved fo
 
 #### Python files
 * **codesource.py** : Main source code of the application
-* **function.py** : File which contains functions
+* **url_extraction_functions.py** : File which contains functions
 * **thread_class.py** : File which contains one class inheriting from 'Tread.threading'
 
 #### Others
@@ -88,7 +88,6 @@ Then install the required packages using the file 'requirements.txt':
 ```
 $ pip install requirements.txt
 ```
-
 To execute the script simply use:
 ```
 $ python3 codesource.py

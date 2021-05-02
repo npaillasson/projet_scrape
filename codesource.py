@@ -6,11 +6,12 @@ import re
 import os
 from bs4 import BeautifulSoup
 from math import ceil
-from functions import *
+from url_extraction_functions import book_page_url_extractor, category_url_extractor
 import time
 from thread_class import ScrapCategory
 
 start = time.time()
+print("The program is running, please wait a moment !")
 
 if not os.path.exists("results/"):  # creation of results directory if it doesn't already exist
     os.mkdir("results")
@@ -24,53 +25,64 @@ URL_INDEX_EXTRACT_EXPRESSION = re.compile(r"index.html$")\
 
 ENCODE_ISSUES_DELETION_EXPRESSION = re.compile(r"[âÃ©]")
 
-BASE_CATEGORY_URL = "http://books.toscrape.com/catalogue/category/books/" \
-    # common part of category's links
+BASE_CATEGORY_URL = "http://books.toscrape.com/catalogue/category/books/"
+# common part of categories' urls
 
 BASE_BOOK_URL = "http://books.toscrape.com/catalogue/"
+# Common part of books pages urls
 
 TARGET_URL = "http://books.toscrape.com/"
+# home page url
 
 main_request = requests.get(TARGET_URL)
 
 book_process_list = []  # empty list used to stock all threads before their execution
+# (1 thread per category)
 
 if main_request.ok:
 
     main_soup = BeautifulSoup(main_request.text, "html.parser")
-    category_urls_list = list()  # empty list used to stock all categories' urls
+    categories_url_list = []  # empty list used to stock all categories' url
 
-    category_urls_list = (category_url_extractor(main_soup, TARGET_URL))
+    categories_url_list = category_url_extractor(main_soup, TARGET_URL)
 
-for category_url in category_urls_list:
+for category_url in categories_url_list:
 
-    category_request = requests.get(category_url)
+    category_request = requests.get(category_url)  # a query by category to extract the url
+    # of each book contained in it
 
     if category_request.ok:
         category_soup = BeautifulSoup(category_request.text, "html.parser")
         category_name = category_soup.find("h1").get_text()
-        page_number = category_soup.findAll("form")
-        page_number = int(EXTRACT_NUMBER_EXPRESSION.findall(page_number[0].get_text())[0]) \
+        number_of_pages = category_soup.findAll("form")
+        number_of_pages = int(EXTRACT_NUMBER_EXPRESSION.findall(number_of_pages[0].get_text())[0]) \
             # extraction of the amount of books in the category (using regex)
-        page_number = ceil(page_number/20)  # determination of the number of pages in the category
+        number_of_pages = ceil(number_of_pages/20)
+        # determination of the number of pages in the category
         page_counter = 0  # counter used in the while loop
-        books_page_url_list = []
+        books_page_url_list = []  # empty list used to stock every books page
+        # contained in one category
 
-        while page_counter != page_number:  # loop used to get all books url in one category
+        while page_counter != number_of_pages:  # loop used to get all books url in one category
+            # this loop browse through all the pages of the category
             if page_counter == 0:
                 books_page_url_list.extend(book_page_url_extractor(category_soup, BASE_BOOK_URL))
-            else:  # if the category has more than 20 books
+            else:
+                # if the category has more than 20 books
                 # we need to change the url to go to the following page
-                iter_link_category = "{}/page-{}.html".format(BASE_CATEGORY_URL, (page_counter + 1))
-                # we make a new request on this new url and we also create a new Beautifulsoup object
-                iter_category_request = requests.get(iter_link_category)
+                # (replace the end of the url "index.html" by "page-<number>.html")
+                iter_url_category = "{}/page-{}.html".format(BASE_CATEGORY_URL, (page_counter + 1))
+                # we make a new request on this new url
+                # and we also create a new "Beautifulsoup" object
+                iter_category_request = requests.get(iter_url_category)
                 iter_category_soup = BeautifulSoup(iter_category_request.text, "html.parser")
+                # we add each url in the books_page_url_list
                 books_page_url_list.extend(
                     book_page_url_extractor(iter_category_soup, BASE_BOOK_URL))
 
             page_counter += 1
 
-    # instance of every ScrapCategory object (this class is inherited from Thread.thread)
+    # instance of every "ScrapCategory" object (this class is inherited from Thread.thread)
     # we use it to create all csv files and extract all data books for each category \
     # at the same time
     book_process_list.append(ScrapCategory(books_page_url_list, category_name,
@@ -84,4 +96,4 @@ for process in book_process_list:  # we stop every threads contained in book_pro
     process.join()
 
 end = time.time()
-print(end - start)
+print("Thanks for waiting ! your results are in the 'results' folder \nrunning time :", ceil(end - start), "s")
