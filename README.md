@@ -34,16 +34,16 @@ It browses all the different categories of books and extracts the following info
 * image_url
 
 
-Finally, the script generates a .csv file containing the information retrieved for each book in a given category. All results files are named after the category to which the books belong. The results files are placed in a directory named "results". If the directory does not exist, it is automatically created by the script at the root of the project.
+Finally, the script generates a csv file containing the information retrieved for each book in a given category. All results files are named after the category to which the books belong. The results files are placed in a directory named "results". If the directory does not exist, it is automatically created by the script at the root of the project.
 
-###What contains this repository?
+### What contains this repository?
 
-####python files
+#### Python files
 * **codesource.py** : Main source code of the application
 * **function.py** : File which contains functions
 * **thread_class.py** : File which contains one class inheriting from 'Tread.threading'
 
-####others
+#### Others
 * **requierements.txt** (used to install required packages)
 * **README.md** (the file you are reading now)
 
@@ -66,7 +66,7 @@ And their dependencies:
 * [soupsieve](https://pypi.org/project/soupsieve/): version 2.2.1
 * [urllib3](https://pypi.org/project/urllib3/): version 1.26.4
 
-This project also uses the modules **'re'**, **'Thread'**, **'os'** and **'math'**.
+This project also uses the modules **'re'**, **'thread'**, **'os'** and **'math'**.
 
 ###
 

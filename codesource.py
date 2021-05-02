@@ -42,9 +42,6 @@ if main_request.ok:
 
     category_urls_list = (category_url_extractor(main_soup, TARGET_URL))
 
-fin_etape_1 = time.time()
-print("etape 1", fin_etape_1 - depart)
-
 for category_url in category_urls_list:
 
     category_request = requests.get(category_url)
