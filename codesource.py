@@ -75,7 +75,8 @@ for category_url in categories_url_list:
                 # if the category has more than 20 books
                 # we need to change the url to go to the following page
                 # (replace the end of the url "index.html" by "page-<number>.html")
-                iter_url_category = "{}/page-{}.html".format(BASE_CATEGORY_URL, (page_counter + 1))
+                # iter_url_category = "{}/page-{}.html".format(BASE_CATEGORY_URL, (page_counter + 1))
+                iter_url_category = URL_INDEX_EXTRACT_EXPRESSION.sub("page-{}.html".format(page_counter + 1), category_url)
                 # we make a new request on this new url
                 iter_category_request = requests.get(iter_url_category)
                 # and we also create a new "Beautifulsoup" object

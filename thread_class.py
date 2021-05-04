@@ -24,6 +24,7 @@ class ScrapCategory(Thread):
         # dict to convert numbers in letter in a numeric value
         ScrapCategory.rate_dict = {"One": "1", "Two": "2", "Three": "3", "Four": "4", "Five": "5"}
         ScrapCategory.regex_separator = re.compile(r";")
+        ScrapCategory.regex_title_correction = re.compile(r"[/;]")
         self.regex_extract_number = extract_number_expression
         self.url_list = url_list
         self.category_name = category_name
@@ -54,6 +55,7 @@ class ScrapCategory(Thread):
                     book_soup = BeautifulSoup(book_request.text, "html.parser")
 
                     book_title = book_soup.find("h1").get_text()
+                    book_title = ScrapCategory.regex_title_correction.sub("_", book_title)
                     # We fix encode issues in the book title
                     book_title = self.regex_encode_issue.sub("", book_title)
                     rate_and_product_description = book_soup.findAll("p")
