@@ -20,8 +20,6 @@ EXTRACT_NUMBER_EXPRESSION = re.compile(r"\d+")
 # when category contains more than 20 books
 URL_INDEX_EXTRACT_EXPRESSION = re.compile(r"index.html$")
 
-ENCODE_ISSUES_DELETION_EXPRESSION = re.compile(r"[âÃ©]")
-
 # common part of categories' url
 BASE_CATEGORY_URL = "http://books.toscrape.com/catalogue/category/books/"
 
@@ -44,7 +42,6 @@ if main_request.ok:
 
     main_soup = BeautifulSoup(main_request.text, "html.parser")
     # empty list used to stock all categories' url
-    categories_url_list = []
 
     categories_url_list = category_url_extractor(main_soup, TARGET_URL)
 
@@ -75,7 +72,8 @@ for category_url in categories_url_list:
                 # if the category has more than 20 books
                 # we need to change the url to go to the following page
                 # (replace the end of the url "index.html" by "page-<number>.html")
-                iter_url_category = URL_INDEX_EXTRACT_EXPRESSION.sub("page-{}.html".format(page_counter + 1), category_url)
+                iter_url_category = URL_INDEX_EXTRACT_EXPRESSION.sub(
+                    "page-{}.html".format(page_counter + 1), category_url)
                 # we make a new request on this new url
                 iter_category_request = requests.get(iter_url_category)
                 # and we also create a new "Beautifulsoup" object
@@ -89,8 +87,7 @@ for category_url in categories_url_list:
     # instance of every "ScrapCategory" object (this class is inherited from Thread.thread)
     # we use it to create all csv files and extract all data books for each category \
     # at the same time
-    book_process_list.append(ScrapCategory(books_page_url_list, category_name,
-                                           ENCODE_ISSUES_DELETION_EXPRESSION, TARGET_URL,
+    book_process_list.append(ScrapCategory(books_page_url_list, category_name, TARGET_URL,
                                            EXTRACT_NUMBER_EXPRESSION))
 
 # we start every threads contained in book_process_list

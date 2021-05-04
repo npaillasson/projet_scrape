@@ -11,26 +11,24 @@ from bs4 import BeautifulSoup
 class ScrapCategory(Thread):
     """Thread used to get all books data in one category and create the correspondent csv file"""
 
-    def __init__(self, url_list, category_name,
-                 regex_encode_issue, target_url,
+    def __init__(self, url_list, category_name, target_url,
                  extract_number_expression):
         """Thread initialization"""
 
         Thread.__init__(self)
         # columns HEADERS"
-        ScrapCategory.columns_headers = "product_page_url; universal_ product_code (upc);" \
-                                        " title; price_including_tax; " \
-                                        "price_excluding_tax; number_available;" \
-                                        " product_description; category;" \
-                                        " review_rating; image_url"
+        self.columns_headers = "product_page_url; universal_ product_code (upc);" \
+                               " title; price_including_tax; " \
+                               "price_excluding_tax; number_available;" \
+                               " product_description; category;" \
+                               " review_rating; image_url"
         # dict to convert numbers in letter in a numeric value
-        ScrapCategory.rate_dict = {"One": "1", "Two": "2", "Three": "3", "Four": "4", "Five": "5"}
-        ScrapCategory.regex_separator = re.compile(r";")
-        ScrapCategory.regex_title_correction = re.compile(r"/")
+        self.rate_dict = {"One": "1", "Two": "2", "Three": "3", "Four": "4", "Five": "5"}
+        self.regex_title_correction = re.compile(r"/")
+        self.regex_wrong_separator = re.compile(r";")
         self.regex_extract_number = extract_number_expression
         self.url_list = url_list
         self.category_name = category_name
-        self.regex_encode_issue = regex_encode_issue
         self.target_url = target_url
 
     def run(self):
@@ -45,7 +43,7 @@ class ScrapCategory(Thread):
             os.mkdir("results/{}/books_img".format(self.category_name))
 
         with open("results/{}/{}.csv".format(self.category_name, self.category_name), "w") as file:
-            file.write(ScrapCategory.columns_headers)
+            file.write(self.columns_headers)
 
             for book_page_url in self.url_list:
 
@@ -59,10 +57,10 @@ class ScrapCategory(Thread):
                     book_title = book_soup.find("h1").get_text()
                     rate_and_product_description = book_soup.findAll("p")
                     rate = rate_and_product_description[2]["class"][1]
-                    rate = ScrapCategory.rate_dict[rate]
+                    rate = self.rate_dict[rate]
                     product_description = rate_and_product_description[3].get_text()
-                    # We put quotes around the product description because he contains ";"
-                    product_description = "\"{}\"".format(product_description)
+                    # We replace ";" with ":" in product_description
+                    product_description = self.regex_wrong_separator.sub(":", product_description)
                     img = book_soup.find("img")
                     img = img["src"].replace("../../", self.target_url)
                     information_table = book_soup.findAll("td")
@@ -78,7 +76,7 @@ class ScrapCategory(Thread):
                     del info_list[2]
                     # remove the field "tax"
                     del info_list[4]
-                    info_list.insert(2, "\"{}\"".format(book_title))
+                    info_list.insert(2, "{}".format(book_title))
                     info_list.insert(6, product_description)
                     info_list.insert(7, self.category_name)
                     info_list[8] = rate
@@ -92,6 +90,6 @@ class ScrapCategory(Thread):
                     file.write("\n" + info)
 
                     # We replace "/" by "-" in book title
-                    book_title = ScrapCategory.regex_title_correction.sub("-", book_title)
+                    book_title = self.regex_title_correction.sub("-", book_title)
                     urllib.request.urlretrieve(img, "results/{}/books_img/{}.png".format(
                         self.category_name, book_title))
