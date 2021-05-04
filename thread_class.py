@@ -1,3 +1,5 @@
+# -*-coding:Utf-8 -*
+
 from threading import Thread
 import re
 import requests
@@ -24,7 +26,7 @@ class ScrapCategory(Thread):
         # dict to convert numbers in letter in a numeric value
         ScrapCategory.rate_dict = {"One": "1", "Two": "2", "Three": "3", "Four": "4", "Five": "5"}
         ScrapCategory.regex_separator = re.compile(r";")
-        ScrapCategory.regex_title_correction = re.compile(r"[/;]")
+        ScrapCategory.regex_title_correction = re.compile(r"/")
         self.regex_extract_number = extract_number_expression
         self.url_list = url_list
         self.category_name = category_name
@@ -50,22 +52,17 @@ class ScrapCategory(Thread):
                 # data extraction from books pages
 
                 book_request = requests.get(book_page_url)
+                book_request.encoding = "utf-8"
 
                 if book_request.ok:
                     book_soup = BeautifulSoup(book_request.text, "html.parser")
-
                     book_title = book_soup.find("h1").get_text()
-                    book_title = ScrapCategory.regex_title_correction.sub("_", book_title)
-                    # We fix encode issues in the book title
-                    book_title = self.regex_encode_issue.sub("", book_title)
                     rate_and_product_description = book_soup.findAll("p")
                     rate = rate_and_product_description[2]["class"][1]
                     rate = ScrapCategory.rate_dict[rate]
-                    product_description = str(rate_and_product_description[3].get_text())
-                    # replace ";" with ":" in the product description paragraph
-                    product_description = ScrapCategory.regex_separator.sub(":", product_description)
-                    # We fix all encode issues in the product description
-                    product_description = self.regex_encode_issue.sub("", product_description)
+                    product_description = rate_and_product_description[3].get_text()
+                    # We put quotes around the product description because he contains ";"
+                    product_description = "\"{}\"".format(product_description)
                     img = book_soup.find("img")
                     img = img["src"].replace("../../", self.target_url)
                     information_table = book_soup.findAll("td")
@@ -81,14 +78,12 @@ class ScrapCategory(Thread):
                     del info_list[2]
                     # remove the field "tax"
                     del info_list[4]
-                    info_list.insert(2, book_title)
+                    info_list.insert(2, "\"{}\"".format(book_title))
                     info_list.insert(6, product_description)
                     info_list.insert(7, self.category_name)
                     info_list[8] = rate
                     info_list.append(img)
 
-                    # fix the encoding issues on the price fields
-                    info_list[3], info_list[4] = info_list[3][1:], info_list[4][1:]
                     # extraction of the number of books available
                     info_list[5] = self.regex_extract_number.findall(info_list[5])[0]
                     # convert info_list in str using ";" as separator before writing it in cvs file
@@ -96,5 +91,7 @@ class ScrapCategory(Thread):
 
                     file.write("\n" + info)
 
+                    # We replace "/" by "-" in book title
+                    book_title = ScrapCategory.regex_title_correction.sub("-", book_title)
                     urllib.request.urlretrieve(img, "results/{}/books_img/{}.png".format(
                         self.category_name, book_title))
