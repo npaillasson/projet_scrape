@@ -61,8 +61,8 @@ class ScrapCategory(Thread):
                     product_description = rate_and_product_description[3].get_text()
                     # We replace ";" with ":" in product_description
                     product_description = self.regex_wrong_separator.sub(":", product_description)
-                    img = book_soup.find("img")
-                    img = img["src"].replace("../../", self.target_url)
+                    img_url = book_soup.find("img")
+                    img_url = img_url["src"].replace("../../", self.target_url)
                     information_table = book_soup.findAll("td")
 
                     # list which contains all data about the book (sorted in order)
@@ -80,7 +80,7 @@ class ScrapCategory(Thread):
                     info_list.insert(6, product_description)
                     info_list.insert(7, self.category_name)
                     info_list[8] = rate
-                    info_list.append(img)
+                    info_list.append(img_url)
 
                     # extraction of the number of books available
                     info_list[5] = self.regex_extract_number.findall(info_list[5])[0]
@@ -91,5 +91,5 @@ class ScrapCategory(Thread):
 
                     # We replace "/" by "-" in book title
                     book_title = self.regex_title_correction.sub("-", book_title)
-                    urllib.request.urlretrieve(img, "results/{}/books_img/{}.png".format(
+                    urllib.request.urlretrieve(img_url, "results/{}/books_img/{}.png".format(
                         self.category_name, book_title))
