@@ -20,9 +20,6 @@ EXTRACT_NUMBER_EXPRESSION = re.compile(r"\d+")
 # when category contains more than 20 books
 URL_INDEX_EXTRACT_EXPRESSION = re.compile(r"index.html$")
 
-# common part of categories' url
-BASE_CATEGORY_URL = "http://books.toscrape.com/catalogue/category/books/"
-
 # Common part of books pages' url
 BASE_BOOK_URL = "http://books.toscrape.com/catalogue/"
 
