@@ -32,8 +32,6 @@ if not os.path.exists("results/"):
 
 main_request = requests.get(TARGET_URL)
 
-# empty list used to stock all threads before their execution (1 thread per category)
-book_process_list = []
 
 if main_request.ok:
 
@@ -41,6 +39,9 @@ if main_request.ok:
     # empty list used to stock all categories' url
 
     categories_url_list = category_url_extractor(main_soup, TARGET_URL)
+
+# empty list used to stock all threads before their execution (1 thread per category)
+book_process_list = []
 
 for category_url in categories_url_list:
 
